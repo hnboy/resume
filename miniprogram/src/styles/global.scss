@@ -1,0 +1,92 @@
+page {
+  background-color: #f5f7fa;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 40rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+}
+
+.btn-secondary {
+  background: #f5f7fa;
+  color: #666;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 40rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+}
+
+.text-primary {
+  color: #667eea;
+}
+
+.text-secondary {
+  color: #999;
+}
+
+.text-success {
+  color: #67c23a;
+}
+
+.text-warning {
+  color: #e6a23c;
+}
+
+.text-danger {
+  color: #f56c6c;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-10 {
+  gap: 20rpx;
+}
+
+.gap-20 {
+  gap: 40rpx;
+}
+
+.mt-20 {
+  margin-top: 40rpx;
+}
+
+.mb-20 {
+  margin-bottom: 40rpx;
+}
