@@ -1,5 +1,34 @@
 <template>
   <div class="create-resume-page">
+    <div class="ai-assistant" v-if="showAI">
+      <div class="ai-header">
+        <span class="ai-icon">🤖</span>
+        <span>AI 智能助手</span>
+        <el-button size="small" @click="showAI = false">关闭</el-button>
+      </div>
+      <div class="ai-content">
+        <div class="ai-option" @click="aiGenerateSummary">
+          <span class="option-icon">✍️</span>
+          <span>生成个人简介</span>
+        </div>
+        <div class="ai-option" @click="aiGenerateBulletPoints">
+          <span class="option-icon">📋</span>
+          <span>生成经历要点</span>
+        </div>
+        <div class="ai-option" @click="aiOptimizeResume">
+          <span class="option-icon">✨</span>
+          <span>优化简历内容</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="page-header">
+      <h2>创建简历</h2>
+      <el-button type="primary" @click="showAI = !showAI" :class="{ active: showAI }">
+        🤖 AI 助手
+      </el-button>
+    </div>
+    
     <el-form ref="formRef" :model="form" label-width="120px" class="resume-form">
       <el-card title="基本信息" class="form-section">
         <el-form-item label="姓名" prop="name">
@@ -173,9 +202,11 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { resumeApi } from '../utils/api'
+import { resumeApi, aiApi } from '../utils/api'
 
 const formRef = ref(null)
+const showAI = ref(false)
+const loading = ref(false)
 
 const form = reactive({
   basicInfo: {
@@ -256,6 +287,56 @@ const submitForm = async () => {
 const goBack = () => {
   window.location.href = '/'
 }
+
+const aiGenerateSummary = async () => {
+  loading.value = true
+  try {
+    const text = `姓名：${form.basicInfo.name}，职位：${form.basicInfo.title}，技能：${form.skills.map(s => s.name).join('、')}`
+    const response = await aiApi.generateSummary(text)
+    form.basicInfo.summary = response.data.data.summary
+    alert('个人简介生成成功！')
+  } catch (error) {
+    alert('生成失败，请重试')
+  }
+  loading.value = false
+}
+
+const aiGenerateBulletPoints = async () => {
+  loading.value = true
+  try {
+    const experienceText = form.experience.map(e => `${e.company} - ${e.position}：${e.description}`).join('；')
+    const response = await aiApi.generateBulletPoints(experienceText)
+    if (form.experience.length > 0) {
+      form.experience[0].description = response.data.data.bulletPoints
+    }
+    alert('经历要点生成成功！')
+  } catch (error) {
+    alert('生成失败，请重试')
+  }
+  loading.value = false
+}
+
+const aiOptimizeResume = async () => {
+  loading.value = true
+  try {
+    const response = await aiApi.generateResume(
+      form.basicInfo,
+      form.education,
+      form.experience,
+      form.skills,
+      form.projects,
+      form.basicInfo.title
+    )
+    const result = response.data.data
+    if (result.summary) {
+      form.basicInfo.summary = result.summary
+    }
+    alert('简历优化建议已生成！请查看个人简介字段')
+  } catch (error) {
+    alert('优化失败，请重试')
+  }
+  loading.value = false
+}
 </script>
 
 <style scoped>
@@ -263,6 +344,66 @@ const goBack = () => {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.ai-assistant {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ai-icon {
+  font-size: 28px;
+  margin-right: 10px;
+}
+
+.ai-content {
+  display: flex;
+  gap: 16px;
+}
+
+.ai-option {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.ai-option:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.option-icon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+}
+
+.page-header .el-button.active {
+  background: #667eea;
 }
 
 .form-section {

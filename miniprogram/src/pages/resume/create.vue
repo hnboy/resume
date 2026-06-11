@@ -1,5 +1,32 @@
 <template>
   <view class="page">
+    <view v-if="showAI" class="ai-assistant">
+      <view class="ai-header">
+        <text class="ai-icon">🤖</text>
+        <text class="ai-title">AI 智能助手</text>
+        <text class="ai-close" @click="showAI = false">×</text>
+      </view>
+      <view class="ai-options">
+        <view class="ai-option" @click="aiGenerateSummary">
+          <text class="option-icon">✍️</text>
+          <text class="option-text">生成个人简介</text>
+        </view>
+        <view class="ai-option" @click="aiGenerateBulletPoints">
+          <text class="option-icon">📋</text>
+          <text class="option-text">生成经历要点</text>
+        </view>
+        <view class="ai-option" @click="aiOptimizeResume">
+          <text class="option-icon">✨</text>
+          <text class="option-text">优化简历内容</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="page-header">
+      <text class="page-title">创建简历</text>
+      <text class="ai-toggle" @click="showAI = !showAI">🤖 AI助手</text>
+    </view>
+
     <view class="form-section">
       <view class="section-header">
         <text class="section-title">基本信息</text>
@@ -155,11 +182,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { resumeApi } from '../../utils/api'
+import { reactive, ref } from 'vue'
+import { resumeApi, aiApi } from '../../utils/api'
 
 const degrees = ['大专', '本科', '硕士', '博士']
 const levels = ['初级', '中级', '高级', '精通']
+const showAI = ref(false)
 
 const form = reactive({
   basicInfo: {
@@ -235,6 +263,63 @@ const submitForm = async () => {
 const goBack = () => {
   uni.navigateBack()
 }
+
+const aiGenerateSummary = async () => {
+  uni.showLoading({ title: '生成中...' })
+  try {
+    const text = `姓名：${form.basicInfo.name}，职位：${form.basicInfo.title}，技能：${form.skills.map(s => s.name).join('、')}`
+    const response = await aiApi.generateSummary(text)
+    if (response.statusCode === 200) {
+      form.basicInfo.summary = response.data.data.summary
+      uni.hideLoading()
+      uni.showToast({ title: '生成成功', icon: 'success' })
+    }
+  } catch (error) {
+    uni.hideLoading()
+    uni.showToast({ title: '生成失败', icon: 'error' })
+  }
+}
+
+const aiGenerateBulletPoints = async () => {
+  uni.showLoading({ title: '生成中...' })
+  try {
+    const experienceText = form.experience.map(e => `${e.company} - ${e.position}：${e.description}`).join('；')
+    const response = await aiApi.generateBulletPoints(experienceText)
+    if (response.statusCode === 200 && form.experience.length > 0) {
+      form.experience[0].description = response.data.data.bulletPoints
+      uni.hideLoading()
+      uni.showToast({ title: '生成成功', icon: 'success' })
+    }
+  } catch (error) {
+    uni.hideLoading()
+    uni.showToast({ title: '生成失败', icon: 'error' })
+  }
+}
+
+const aiOptimizeResume = async () => {
+  uni.showLoading({ title: '优化中...' })
+  try {
+    const response = await aiApi.generateResume({
+      basicInfo: form.basicInfo,
+      education: form.education,
+      experience: form.experience,
+      skills: form.skills,
+      projects: form.projects,
+      targetJob: form.basicInfo.title
+    })
+    if (response.statusCode === 200) {
+      const result = response.data.data
+      if (result.summary) {
+        form.basicInfo.summary = result.summary
+      }
+      uni.hideLoading()
+      uni.showToast({ title: '优化成功', icon: 'success' })
+    }
+  } catch (error) {
+    uni.hideLoading()
+    uni.showToast({ title: '优化失败', icon: 'error' })
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -242,6 +327,81 @@ const goBack = () => {
   padding: 20rpx;
   background: #f5f7fa;
   min-height: 100vh;
+}
+
+.ai-assistant {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.ai-icon {
+  font-size: 40rpx;
+}
+
+.ai-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.ai-close {
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0 20rpx;
+}
+
+.ai-options {
+  display: flex;
+  gap: 20rpx;
+}
+
+.ai-option {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  text-align: center;
+}
+
+.option-icon {
+  font-size: 36rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.option-text {
+  font-size: 24rpx;
+  color: white;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.ai-toggle {
+  font-size: 28rpx;
+  color: #667eea;
+  padding: 10rpx 20rpx;
+  background: #f0f5ff;
+  border-radius: 20rpx;
 }
 
 .form-section {

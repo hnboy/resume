@@ -46,3 +46,31 @@ export const jobApi = {
     method: 'GET'
   })
 }
+
+export const aiApi = {
+  generateResume: (data: any) => uni.request({
+    url: `${baseUrl}/ai/generate`,
+    method: 'POST',
+    data
+  }),
+  optimizeResume: (resumeId: string, jobDescription: string) => uni.request({
+    url: `${baseUrl}/ai/optimize`,
+    method: 'POST',
+    data: { resumeId, jobDescription }
+  }),
+  analyzeJob: (jobDescription: string) => uni.request({
+    url: `${baseUrl}/ai/analyze-job`,
+    method: 'POST',
+    data: { jobDescription }
+  }),
+  generateSummary: (text: string) => uni.request({
+    url: `${baseUrl}/ai/summary`,
+    method: 'POST',
+    data: { text }
+  }),
+  generateBulletPoints: (experience: string) => uni.request({
+    url: `${baseUrl}/ai/bullet-points`,
+    method: 'POST',
+    data: { experience }
+  })
+}

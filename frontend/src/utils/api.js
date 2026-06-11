@@ -20,4 +20,12 @@ export const jobApi = {
   getSuggestions: () => api.get('/jobs/suggestions')
 }
 
+export const aiApi = {
+  generateResume: (data) => api.post('/ai/generate', data),
+  optimizeResume: (resumeId, jobDescription) => api.post('/ai/optimize', { resumeId, jobDescription }),
+  analyzeJob: (jobDescription) => api.post('/ai/analyze-job', { jobDescription }),
+  generateSummary: (text) => api.post('/ai/summary', { text }),
+  generateBulletPoints: (experience) => api.post('/ai/bullet-points', { experience })
+}
+
 export default api
