@@ -3,7 +3,7 @@ const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const config = require('../config')
 
-const storageDir = path.join(__dirname, '..', config.STORAGE_DIR)
+const storageDir = path.resolve(__dirname, '..', process.env.STORAGE_DIR || config.STORAGE_DIR)
 
 if (!fs.existsSync(storageDir)) {
   fs.mkdirSync(storageDir, { recursive: true })
@@ -34,7 +34,7 @@ exports.getAllResumes = async () => {
 
 exports.getResumeById = async (id) => {
   const resumes = readResumes()
-  return resumes.find(r => r.id === id)
+  return resumes.find(r => r.id === id) || null
 }
 
 exports.createResume = async (data) => {
@@ -54,10 +54,11 @@ exports.updateResume = async (id, data) => {
   const resumes = readResumes()
   const index = resumes.findIndex(r => r.id === id)
   if (index === -1) return null
-  
+
   resumes[index] = {
     ...resumes[index],
     ...data,
+    id,
     updatedAt: new Date().toISOString()
   }
   writeResumes(resumes)
@@ -73,47 +74,47 @@ exports.deleteResume = async (id) => {
 }
 
 exports.generateTargetedResume = async (id, jobDescription) => {
-  const resume = await this.getResumeById(id)
+  const resume = await exports.getResumeById(id)
   if (!resume) throw new Error('简历不存在')
-  
+
   const keywords = extractKeywords(jobDescription)
   const targetedResume = optimizeResumeForJob(resume, keywords)
-  
+
   return targetedResume
 }
 
 const extractKeywords = (jobDescription) => {
   const techKeywords = [
-    'Java', 'Python', 'JavaScript', 'TypeScript', 'Go', 'Rust', 'C++', 'React', 
+    'Java', 'Python', 'JavaScript', 'TypeScript', 'Go', 'Rust', 'C++', 'React',
     'Vue', 'Angular', 'Node.js', 'Spring', 'Django', 'MySQL', 'PostgreSQL',
     'MongoDB', 'Redis', 'Docker', 'Kubernetes', 'AWS', 'Git', 'Linux'
   ]
-  
+
   const softSkills = [
     '团队协作', '沟通能力', '项目管理', '问题解决', '学习能力', '创新思维'
   ]
-  
+
   const foundKeywords = []
-  
+
   techKeywords.forEach(keyword => {
     if (jobDescription.toLowerCase().includes(keyword.toLowerCase())) {
       foundKeywords.push(keyword)
     }
   })
-  
+
   softSkills.forEach(skill => {
     if (jobDescription.includes(skill)) {
       foundKeywords.push(skill)
     }
   })
-  
+
   return foundKeywords
 }
 
 const optimizeResumeForJob = (resume, keywords) => {
   const optimized = { ...resume }
-  
-  if (optimized.experience) {
+
+  if (Array.isArray(optimized.experience) && optimized.experience.length > 0) {
     optimized.experience = optimized.experience.map(exp => {
       let score = 0
       keywords.forEach(keyword => {
@@ -125,19 +126,19 @@ const optimizeResumeForJob = (resume, keywords) => {
       return { ...exp, relevanceScore: score }
     }).sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
   }
-  
-  if (optimized.skills) {
+
+  if (Array.isArray(optimized.skills) && optimized.skills.length > 0) {
     optimized.skills = optimized.skills.map(skill => {
-      const matched = keywords.some(k => 
-        skill.name.toLowerCase().includes(k.toLowerCase()) || 
-        k.toLowerCase().includes(skill.name.toLowerCase())
+      const matched = keywords.some(k =>
+        (skill.name || '').toLowerCase().includes(k.toLowerCase()) ||
+        k.toLowerCase().includes((skill.name || '').toLowerCase())
       )
       return { ...skill, highlighted: matched }
     }).sort((a, b) => (b.highlighted ? 1 : 0) - (a.highlighted ? 1 : 0))
   }
-  
+
   optimized.keywords = keywords
   optimized.optimizedAt = new Date().toISOString()
-  
+
   return optimized
 }
