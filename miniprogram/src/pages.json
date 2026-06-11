@@ -1,0 +1,60 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "简历生成器"
+      }
+    },
+    {
+      "path": "pages/resume/create",
+      "style": {
+        "navigationBarTitleText": "创建简历"
+      }
+    },
+    {
+      "path": "pages/resume/edit",
+      "style": {
+        "navigationBarTitleText": "编辑简历"
+      }
+    },
+    {
+      "path": "pages/resume/preview",
+      "style": {
+        "navigationBarTitleText": "简历预览"
+      }
+    },
+    {
+      "path": "pages/job/match",
+      "style": {
+        "navigationBarTitleText": "岗位匹配"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "简历生成器",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#409EFF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/icons/home.png",
+        "selectedIconPath": "static/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/job/match",
+        "text": "岗位匹配",
+        "iconPath": "static/icons/job.png",
+        "selectedIconPath": "static/icons/job-active.png"
+      }
+    ]
+  }
+}
